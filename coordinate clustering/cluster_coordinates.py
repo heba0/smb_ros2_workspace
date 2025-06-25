@@ -3,13 +3,13 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 
 # Load CSV
-df = pd.read_csv("sample_input.csv")
+df = pd.read_csv("detections_world.csv")
 
-# Optional: Filter low-likelihood values
-# df = df[df["likelihood"] > 0.8]
+# Make sure the column name is 'label', not 'class'
+df = df.rename(columns={"class": "label"})  # if needed
 
-# 🔍 Filter only these classes
-allowed_labels = ["bottle", "chair"]
+# ✅ Filter only these labels
+allowed_labels = ["clock", "umbrella", "backpack", "stop sign", "bottle"]
 df = df[df["label"].isin(allowed_labels)]
 
 results = []
@@ -27,8 +27,6 @@ for label in df["label"].unique():
 
     for cluster_id, group in clustered.groupby("cluster_id"):
         mean_coords = group[["x", "y", "z"]].mean().to_dict()
-        sum_likelihood = group["likelihood"].sum()
-        avg_likelihood = group["likelihood"].mean()
 
         results.append(
             {
@@ -38,9 +36,6 @@ for label in df["label"].unique():
                 "mean_y": mean_coords["y"],
                 "mean_z": mean_coords["z"],
                 "num_points": len(group),
-                "sum_likelihood": sum_likelihood,
-                "avg_likelihood": avg_likelihood,
-                "confidence_score": avg_likelihood,  # same as avg_likelihood for now
             }
         )
 
@@ -49,4 +44,4 @@ result_df = pd.DataFrame(results)
 
 # Output
 print(result_df)
-result_df.to_csv("clustered_filtered_output.csv", index=False)
+result_df.to_csv("DBSCAN_output.csv", index=False)
