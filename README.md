@@ -1,3 +1,39 @@
+# Instructions to Use Current Fork
+
+```bash
+git remote add private git@github.com:heba0/smb_ros2_workspace.git
+```
+
+```bash
+git add 
+```
+
+```bash
+git commit -m <commit message>
+```
+
+```bash
+git push private <branch-name>
+```
+
+## Parameters Tracking
+
+In 
+dependencies/holistic_fusion/ros2/examples/smb_estimator_graph_ros2/config/smb_specific/smb_graph_params.yaml
+
+change the paramters to the following
+
+```bash
+useLioOdometry: true
+useWheelOdometryBetween: false
+useWheelLinearVelocities: true
+useVioOdometry: true
+```
+
+
+
+
+
 # SMB ROS2 Workspace 🤖
 
 This is the development workspace for Robotics Summer School 2025.
