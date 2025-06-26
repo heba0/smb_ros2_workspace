@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import open3d as o3d
 import pandas as pd
+from cluster_coordinates import cluster_data
 
 
 def make_map(pcd_path, voxel, point_size, alpha):
@@ -17,6 +18,7 @@ def make_map(pcd_path, voxel, point_size, alpha):
     mat.point_size = point_size
     return cloud, mat
 
+
 def compute_distances_to_map_pts(detection_pts, map_pts_tree):
     dists = []
     for pt in detection_pts:
@@ -24,6 +26,7 @@ def compute_distances_to_map_pts(detection_pts, map_pts_tree):
         dist = np.sqrt(dist_sq[0])
         dists.append(dist)
     return np.array(dists)
+
 
 def dist_to_color(distances, cmap_name="jet", vmin=None, vmax=None):
     # Normalize distances for colormap (smaller distance = hotter color)
@@ -36,9 +39,10 @@ def dist_to_color(distances, cmap_name="jet", vmin=None, vmax=None):
     colors = cmap(1 - norm(distances))[:, :3]  # invert: close = red
     return colors
 
+
 def make_objects_colored(csv_path, radius, map_pts_tree):
     df = pd.read_csv(csv_path)
-    xyz = df[["x", "y", "z"]].to_numpy(float)
+    xyz = df[["mean_x", "mean_y", "mean_z"]].to_numpy(float)
     labs = df["class"].astype(str).tolist()
 
     # Compute distances to nearest map points
@@ -58,10 +62,13 @@ def make_objects_colored(csv_path, radius, map_pts_tree):
 
     return merged_mesh, mat, xyz, labs
 
+
 def main():
+    cluster_data()
+
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pcd", required=True)
-    ap.add_argument("--csv", required=True)
+    ap.add_argument("--pcd", default="assemble_map.pcd")
+    ap.add_argument("--csv", default="DBSCAN_output.csv")
     ap.add_argument("--map_voxel", type=float, default=0.05)
     ap.add_argument("--map_pts", type=float, default=1.0)
     ap.add_argument("--radius", type=float, default=0.15)
@@ -72,7 +79,9 @@ def main():
     # Build KD-tree from map points
     map_kdtree = o3d.geometry.KDTreeFlann(map_geo)
 
-    obj_mesh, obj_mat, pts, lbl = make_objects_colored(args.csv, args.radius, map_kdtree)
+    obj_mesh, obj_mat, pts, lbl = make_objects_colored(
+        args.csv, args.radius, map_kdtree
+    )
 
     app = o3d.visualization.gui.Application.instance
     app.initialize()
@@ -88,6 +97,7 @@ def main():
     vis.reset_camera_to_default()
     app.add_window(vis)
     app.run()
+
 
 if __name__ == "__main__":
     main()
